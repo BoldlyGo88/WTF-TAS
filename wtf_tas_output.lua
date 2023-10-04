@@ -44,11 +44,11 @@ while true do
       end;
    end;
       
-	for __,_ in pairs(frames) do
+   for __,_ in pairs(frames) do
       data[1] = "System: "..system.." ROM: "..rom.." Record Date: "..record_date.." Active Frames: "..tostring(used_frames).." Inputs: "..tostring(total_inputs).."\n\n";
       data[#data + 1] = tostring(__).." "..table.concat(_,",").."\n";
-		frames[__] = nil;
-	end;
+      frames[__] = nil;
+   end;
    
    local file = io.open(rom..".wtf","w");
    for __,_ in ipairs(data) do
