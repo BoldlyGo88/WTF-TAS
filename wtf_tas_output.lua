@@ -1,6 +1,8 @@
 local frames,data = {},{};
 local systems = {["NES"] = 4, ["SNES"] = 5, ["GB"] = -1, ["GBA"] = -1, ["GBC"] = -1, ["VB"] = 1};
 local system = emu.getsystemid();
+local started = false;
+local magic_frame;
 
 -- minimal tas information
 local record_date = os.date("%Y-%m-%d");
@@ -10,12 +12,14 @@ local rom = gameinfo.getromname();
 
 print("System: "..system.." "..systems[system]);
 print("ROM: "..rom);
+print("To start recording the data press the 'R' key");
+print("To finish recording press 'R' again.");
 
 function LogButton(button, frame)
    if button then
       for __,_ in pairs(button) do
          if _ then
-            print("Logging: "..tostring(frame));
+            gui.text(0, 68, 'Logging Frame: ' ..tostring(frame));
             if not frames[frame] then
                frames[frame] = {};
                used_frames = used_frames + 1;
@@ -29,8 +33,23 @@ end;
 
 while true do
    local frame = emu.framecount();
+   local key = input.get()["R"];
    
-   if system and systems[system] then
+   if key and not started then
+      if not magic_frame or frame - magic_frame >= 10 then
+         print("Starting...");
+         started = true;
+         magic_frame = frame;
+      end;
+   elseif key and started then
+      if frame - magic_frame >= 10 then
+         print("Ending...");
+         started = false;
+         magic_frame = frame;
+      end;
+   end;
+         
+   if system and systems[system] and started then
       if systems[system] == -1 then
          if movie.mode() == "PLAY" then
             LogButton(movie.getinput(frame), frame);
@@ -42,19 +61,25 @@ while true do
             end;
          end;
       end;
+      
+      gui.text(0, 36, 'Active Frames: ' ..tostring(used_frames));
+      gui.text(0, 52, 'Total Inputs: ' ..tostring(total_inputs));
    end;
       
-   for __,_ in pairs(frames) do
+	for __,_ in pairs(frames) do
       data[1] = "System: "..system.." ROM: "..rom.." Record Date: "..record_date.." Active Frames: "..tostring(used_frames).." Inputs: "..tostring(total_inputs).."\n\n";
       data[#data + 1] = tostring(__).." "..table.concat(_,",").."\n";
-      frames[__] = nil;
-   end;
+		frames[__] = nil;
+	end;
    
-   local file = io.open(rom..".wtf","w");
-   for __,_ in ipairs(data) do
-      file:write(_);
+   if #data > 0 and not started then
+      local file = io.open(rom..".wtf","a+");
+      for __,_ in ipairs(data) do
+         file:write(_);
+         data[__] = nil;
+      end;
+      file:close();
    end;
-	file:close();
   
    emu.frameadvance();
 end;
