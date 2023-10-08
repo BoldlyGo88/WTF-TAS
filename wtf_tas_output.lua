@@ -67,9 +67,9 @@ while true do
    end;
       
 	for __,_ in pairs(frames) do
-      data[1] = "System: "..system.." ROM: "..rom.." Record Date: "..record_date.." Active Frames: "..tostring(used_frames).." Inputs: "..tostring(total_inputs).."\n\n";
-      data[#data + 1] = tostring(__).." "..table.concat(_,",").."\n";
-		frames[__] = nil;
+      	   data[1] = "System: "..system.." ROM: "..rom.." Record Date: "..record_date.." Active Frames: "..tostring(used_frames).." Inputs: "..tostring(total_inputs).."\n\n";
+           data[#data + 1] = tostring(__).." "..table.concat(_,",").."\n";
+	   frames[__] = nil;
 	end;
    
    if #data > 0 and not started then
